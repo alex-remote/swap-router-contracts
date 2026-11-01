@@ -5,31 +5,31 @@ pragma abicoder v2;
 interface IApproveAndCall {
     enum ApprovalType {NOT_REQUIRED, MAX, MAX_MINUS_ONE, ZERO_THEN_MAX, ZERO_THEN_MAX_MINUS_ONE}
 
-    /// @dev Lens to be called off-chain to determine which (if any) of the relevant approval functions should be called
-    /// @param token The token to approve
-    /// @param amount The amount to approve
-    /// @return The required approval type
+    /// @dev 供链下调用的查询函数（lens），用于确定应调用相关授权函数中的哪一个（如有）
+    /// @param token 要授权的代币
+    /// @param amount 要授权的数量
+    /// @return 所需的授权类型
     function getApprovalType(address token, uint256 amount) external returns (ApprovalType);
 
-    /// @notice Approves a token for the maximum possible amount
-    /// @param token The token to approve
+    /// @notice 以最大可能数量授权某个代币
+    /// @param token 要授权的代币
     function approveMax(address token) external payable;
 
-    /// @notice Approves a token for the maximum possible amount minus one
-    /// @param token The token to approve
+    /// @notice 以最大可能数量减一授权某个代币
+    /// @param token 要授权的代币
     function approveMaxMinusOne(address token) external payable;
 
-    /// @notice Approves a token for zero, then the maximum possible amount
-    /// @param token The token to approve
+    /// @notice 先将代币授权为零，再以最大可能数量授权
+    /// @param token 要授权的代币
     function approveZeroThenMax(address token) external payable;
 
-    /// @notice Approves a token for zero, then the maximum possible amount minus one
-    /// @param token The token to approve
+    /// @notice 先将代币授权为零，再以最大可能数量减一授权
+    /// @param token 要授权的代币
     function approveZeroThenMaxMinusOne(address token) external payable;
 
-    /// @notice Calls the position manager with arbitrary calldata
-    /// @param data Calldata to pass along to the position manager
-    /// @return result The result from the call
+    /// @notice 使用任意 calldata 调用头寸管理器（position manager）
+    /// @param data 要转发给头寸管理器的 calldata
+    /// @return result 调用的返回结果
     function callPositionManager(bytes memory data) external payable returns (bytes memory result);
 
     struct MintParams {
@@ -43,9 +43,9 @@ interface IApproveAndCall {
         address recipient;
     }
 
-    /// @notice Calls the position manager's mint function
-    /// @param params Calldata to pass along to the position manager
-    /// @return result The result from the call
+    /// @notice 调用头寸管理器的 mint 函数
+    /// @param params 要转发给头寸管理器的 calldata
+    /// @return result 调用的返回结果
     function mint(MintParams calldata params) external payable returns (bytes memory result);
 
     struct IncreaseLiquidityParams {
@@ -56,8 +56,8 @@ interface IApproveAndCall {
         uint256 amount1Min;
     }
 
-    /// @notice Calls the position manager's increaseLiquidity function
-    /// @param params Calldata to pass along to the position manager
-    /// @return result The result from the call
+    /// @notice 调用头寸管理器的 increaseLiquidity 函数
+    /// @param params 要转发给头寸管理器的 calldata
+    /// @return result 调用的返回结果
     function increaseLiquidity(IncreaseLiquidityParams calldata params) external payable returns (bytes memory result);
 }

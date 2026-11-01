@@ -11,10 +11,10 @@ contract MockObservations {
     uint16 private slot0ObservationCardinality;
     uint16 private slot0ObservationIndex;
 
-    // observations
+    // 观测值
     Oracle.Observation[65535] public observations;
 
-    // block timestamps always monotonic increasing from 0, cumulative ticks are calculated automatically
+    // 区块时间戳总是从 0 开始单调递增，累计 tick 会自动计算
     constructor(
         uint32[3] memory blockTimestamps,
         int24[3] memory ticks,

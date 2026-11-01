@@ -11,20 +11,20 @@ import '../interfaces/ISwapRouter02.sol';
 import '../interfaces/ITokenValidator.sol';
 import '../base/ImmutableState.sol';
 
-/// @notice Validates tokens by flash borrowing from the token/<base token> pool on V2.
-/// @notice Returns
-///     Status.FOT if we detected a fee is taken on transfer.
-///     Status.STF if transfer failed for the token.
-///     Status.UNKN if we did not detect any issues with the token.
-/// @notice A return value of Status.UNKN does not mean the token is definitely not a fee on transfer token
-///     or definitely has no problems with its transfer. It just means we cant say for sure that it has any
-///     issues.
-/// @dev We can not guarantee the result of this lens is correct for a few reasons:
-/// @dev 1/ Some tokens take fees or allow transfers under specific conditions, for example some have an allowlist
-/// @dev    of addresses that do/dont require fees. Therefore the result is not guaranteed to be correct
-/// @dev    in all circumstances.
-/// @dev 2/ It is possible that the token does not have any pools on V2 therefore we are not able to perform
-/// @dev    a flashloan to test the token.
+/// @notice 通过从 V2 上的代币/<基础代币>池子进行闪电借贷来验证代币。
+/// @notice 返回值
+///     Status.FOT：检测到转账时会被收取手续费。
+///     Status.STF：该代币转账失败。
+///     Status.UNKN：未检测到该代币存在任何问题。
+/// @notice 返回值为 Status.UNKN 并不意味着该代币一定不是转账收费（fee-on-transfer）代币，
+///     或其转账一定没有问题。这仅表示我们无法确定它存在任何
+///     问题。
+/// @dev 出于以下几点原因，我们无法保证此 lens 的结果一定正确：
+/// @dev 1/ 某些代币仅在特定条件下收取手续费或允许转账，例如有些代币设有一份白名单，
+/// @dev    列出需要/不需要收取手续费的地址。因此无法保证结果在所有情况下
+/// @dev    都是正确的。
+/// @dev 2/ 该代币可能在 V2 上没有任何池子，因此我们无法执行
+/// @dev    闪电贷来测试该代币。
 contract TokenValidator is ITokenValidator, IUniswapV2Callee, ImmutableState {
     string internal constant FOT_REVERT_STRING = 'FOT';
     // https://github.com/Uniswap/v2-core/blob/1136544ac842ff48ae0b1b939701436598d74075/contracts/UniswapV2Pair.sol#L46
@@ -68,8 +68,8 @@ contract TokenValidator is ITokenValidator, IUniswapV2Callee, ImmutableState {
 
         address pairAddress = UniswapV2Library.pairFor(this.factoryV2(), token, baseToken);
 
-        // If the token/baseToken pair exists, get token0.
-        // Must do low level call as try/catch does not support case where contract does not exist.
+        // 如果 token/baseToken 交易对存在，则获取 token0。
+        // 必须使用低级调用，因为 try/catch 不支持合约不存在的情况。
         (, bytes memory returnData) = address(pairAddress).call(abi.encodeWithSelector(IUniswapV2Pair.token0.selector));
 
         if (returnData.length == 0) {
@@ -78,7 +78,7 @@ contract TokenValidator is ITokenValidator, IUniswapV2Callee, ImmutableState {
 
         address token0Address = abi.decode(returnData, (address));
 
-        // Flash loan {amountToBorrow}
+        // 闪电贷 {amountToBorrow}
         (uint256 amount0Out, uint256 amount1Out) =
             token == token0Address ? (amountToBorrow, uint256(0)) : (uint256(0), amountToBorrow);
 
@@ -100,7 +100,7 @@ contract TokenValidator is ITokenValidator, IUniswapV2Callee, ImmutableState {
             return Status.UNKN;
         }
 
-        // Swap always reverts so should never reach.
+        // 兑换总会 revert，因此永远不应执行到此处。
         revert('Unexpected error');
     }
 
@@ -109,8 +109,8 @@ contract TokenValidator is ITokenValidator, IUniswapV2Callee, ImmutableState {
     }
 
     function isTransferFailed(string memory reason) internal pure returns (bool) {
-        // We check the suffix of the revert string so we can support forks that
-        // may have modified the prefix.
+        // 我们检查 revert 字符串的后缀，以便支持那些
+        // 可能修改了前缀的分叉版本。
         string memory stf = STF_REVERT_STRING_SUFFIX;
 
         uint256 reasonLength = bytes(reason).length;
@@ -145,15 +145,15 @@ contract TokenValidator is ITokenValidator, IUniswapV2Callee, ImmutableState {
         (uint256 balanceBeforeLoan, uint256 amountRequestedToBorrow) = abi.decode(data, (uint256, uint256));
         uint256 amountBorrowed = tokenBorrowed.balanceOf(address(this)) - balanceBeforeLoan;
 
-        // If we received less token than we requested when we called swap, then a fee must have been taken
-        // by the token during transfer.
+        // 如果收到的代币少于调用 swap 时请求的数量，那么一定是该代币
+        // 在转账过程中收取了手续费。
         if (amountBorrowed != amountRequestedToBorrow) {
             revert(FOT_REVERT_STRING);
         }
 
-        // Note: If we do not revert here, we would end up reverting in the pair's swap method anyway
-        // since for a flash borrow we need to transfer back the amount we borrowed + 0.3% fee, and we don't
-        // have funds to cover the fee. Revert early here to save gas/time.
+        // 注意：即使不在此处 revert，最终也会在交易对的 swap 方法中 revert，
+        // 因为闪电借贷需要归还借入的数量加上 0.3% 的手续费，而我们没有
+        // 足够的资金支付该手续费。因此在此提前 revert 以节省 gas/时间。
         revert('Unknown');
     }
 }

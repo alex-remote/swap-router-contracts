@@ -4,10 +4,10 @@ pragma solidity >=0.6.0;
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
 
 library PoolTicksCounter {
-    /// @dev This function counts the number of initialized ticks that would incur a gas cost between tickBefore and tickAfter.
-    /// When tickBefore and/or tickAfter themselves are initialized, the logic over whether we should count them depends on the
-    /// direction of the swap. If we are swapping upwards (tickAfter > tickBefore) we don't want to count tickBefore but we do
-    /// want to count tickAfter. The opposite is true if we are swapping downwards.
+    /// @dev 该函数统计 tickBefore 与 tickAfter 之间会产生 gas 开销的已初始化 tick 的数量。
+    /// 当 tickBefore 和/或 tickAfter 本身已初始化时，是否应计入它们取决于
+    /// 兑换的方向。若向上兑换（tickAfter > tickBefore），则不计入 tickBefore，但
+    /// 要计入 tickAfter。若向下兑换，则情况相反。
     function countInitializedTicksCrossed(
         IUniswapV3Pool self,
         int24 tickBefore,
@@ -21,24 +21,24 @@ library PoolTicksCounter {
         bool tickAfterInitialized;
 
         {
-            // Get the key and offset in the tick bitmap of the active tick before and after the swap.
+            // 获取兑换前后活跃 tick 在 tick bitmap 中的键与偏移量。
             int16 wordPos = int16((tickBefore / self.tickSpacing()) >> 8);
             uint8 bitPos = uint8((tickBefore / self.tickSpacing()) % 256);
 
             int16 wordPosAfter = int16((tickAfter / self.tickSpacing()) >> 8);
             uint8 bitPosAfter = uint8((tickAfter / self.tickSpacing()) % 256);
 
-            // In the case where tickAfter is initialized, we only want to count it if we are swapping downwards.
-            // If the initializable tick after the swap is initialized, our original tickAfter is a
-            // multiple of tick spacing, and we are swapping downwards we know that tickAfter is initialized
-            // and we shouldn't count it.
+            // 当 tickAfter 已初始化时，只有在向下兑换的情况下才计入它。
+            // 如果兑换后的可初始化 tick 已初始化、原始 tickAfter 是
+            // tick spacing 的整数倍，并且是向下兑换，则可知 tickAfter 已初始化，
+            // 且不应计入它。
             tickAfterInitialized =
                 ((self.tickBitmap(wordPosAfter) & (1 << bitPosAfter)) > 0) &&
                 ((tickAfter % self.tickSpacing()) == 0) &&
                 (tickBefore > tickAfter);
 
-            // In the case where tickBefore is initialized, we only want to count it if we are swapping upwards.
-            // Use the same logic as above to decide whether we should count tickBefore or not.
+            // 当 tickBefore 已初始化时，只有在向上兑换的情况下才计入它。
+            // 使用与上面相同的逻辑来决定是否计入 tickBefore。
             tickBeforeInitialized =
                 ((self.tickBitmap(wordPos) & (1 << bitPos)) > 0) &&
                 ((tickBefore % self.tickSpacing()) == 0) &&
@@ -57,12 +57,12 @@ library PoolTicksCounter {
             }
         }
 
-        // Count the number of initialized ticks crossed by iterating through the tick bitmap.
-        // Our first mask should include the lower tick and everything to its left.
+        // 通过遍历 tick bitmap 统计穿越的已初始化 tick 数量。
+        // 第一个掩码应包含较低的 tick 及其左侧的所有位。
         uint256 mask = type(uint256).max << bitPosLower;
         while (wordPosLower <= wordPosHigher) {
-            // If we're on the final tick bitmap page, ensure we only count up to our
-            // ending tick.
+            // 如果处于最后一个 tick bitmap 页，确保只统计到
+            // 结束 tick 为止。
             if (wordPosLower == wordPosHigher) {
                 mask = mask & (type(uint256).max >> (255 - bitPosHigher));
             }
@@ -70,7 +70,7 @@ library PoolTicksCounter {
             uint256 masked = self.tickBitmap(wordPosLower) & mask;
             initializedTicksCrossed += countOneBits(masked);
             wordPosLower++;
-            // Reset our mask so we consider all bits on the next iteration.
+            // 重置掩码，以便在下一次迭代中考虑所有位。
             mask = type(uint256).max;
         }
 

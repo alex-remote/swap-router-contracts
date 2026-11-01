@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.5.0;
 
-/// @title Immutable state
-/// @notice Functions that return immutable state of the router
+/// @title 不可变状态
+/// @notice 返回路由合约不可变状态的函数
 interface IImmutableState {
-    /// @return Returns the address of the Uniswap V2 factory
+    /// @return 返回 Uniswap V2 工厂合约的地址
     function factoryV2() external view returns (address);
 
-    /// @return Returns the address of Uniswap V3 NFT position manager
+    /// @return 返回 Uniswap V3 NFT 头寸管理器的地址
     function positionManager() external view returns (address);
 }

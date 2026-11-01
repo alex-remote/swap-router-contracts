@@ -16,32 +16,32 @@ const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 const UNI = '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 
-/// @dev basic V2 routes
+/// @dev 基础 V2 路由
 const DAI_V2_UNI_V2_WETH = encodePath([DAI, UNI, WETH], [V2_FEE_PLACEHOLDER, V2_FEE_PLACEHOLDER])
 const USDC_V2_UNI_V2_WETH = encodePath([USDC, UNI, WETH], [V2_FEE_PLACEHOLDER, V2_FEE_PLACEHOLDER])
 
-/// @dev basic V3 routes
+/// @dev 基础 V3 路由
 const USDC_V3_USDT = encodePath([USDC, USDT], [FeeAmount.LOW])
 const UNI_V3_WETH = encodePath([UNI, WETH], [FeeAmount.MEDIUM])
 
-/// @dev stablecoin IL routes
+/// @dev 稳定币 IL 路由
 const USDT_V3_DAI_V2_USDC = encodePath([USDT, DAI, USDC], [FeeAmount.LOW, V2_FEE_PLACEHOLDER])
 const DAI_V3_USDC_V2_USDT = encodePath([DAI, USDC, USDT], [100, V2_FEE_PLACEHOLDER])
 
-/// @dev erc20 IL routes
+/// @dev erc20 IL 路由
 // V3 - V2
 const UNI_V3_WETH_V2_DAI = encodePath([UNI, WETH, DAI], [FeeAmount.MEDIUM, V2_FEE_PLACEHOLDER])
 const USDC_V3_UNI_V2_WETH = encodePath([USDC, UNI, WETH], [FeeAmount.MEDIUM, V2_FEE_PLACEHOLDER])
 // V2 - V3
 const UNI_V2_WETH_V3_DAI = encodePath([UNI, WETH, DAI], [V2_FEE_PLACEHOLDER, FeeAmount.MEDIUM])
 
-/// @dev complex IL routes
-// (use two V3 pools)
+/// @dev 复杂 IL 路由
+// （使用两个 V3 池子）
 const DAI_V3_3000_UNI_V2_USDT_V3_3000_WETH = encodePath(
   [DAI, UNI, USDT, WETH],
   [FeeAmount.MEDIUM, V2_FEE_PLACEHOLDER, FeeAmount.MEDIUM]
 )
-// (use two V2 pools)
+// （使用两个 V2 池子）
 const DAI_V3_3000_UNI_V2_USDT_V2_WETH = encodePath(
   [DAI, UNI, USDT, WETH],
   [FeeAmount.MEDIUM, V2_FEE_PLACEHOLDER, V2_FEE_PLACEHOLDER]
@@ -74,7 +74,7 @@ describe('MixedRouteQuoterV1 integration tests', function () {
   })
 
   after(async () => {
-    // Disable mainnet forking to avoid effecting other tests.
+    // 禁用主网分叉，以避免影响其他测试。
     await hre.network.provider.request({
       method: 'hardhat_reset',
       params: [],
@@ -82,7 +82,7 @@ describe('MixedRouteQuoterV1 integration tests', function () {
   })
 
   /**
-   * Test values only valid starting at block 14390000
+   * 测试数值仅从区块 14390000 开始有效
    */
   it('sets block number correctly', async () => {
     const blockNumber = BigNumber.from(
@@ -91,12 +91,12 @@ describe('MixedRouteQuoterV1 integration tests', function () {
         params: [],
       })
     )
-    /// @dev +1 so 14390001 since we just requested
+    /// @dev +1，即 14390001，因为我们刚刚发起了请求
     expect(blockNumber.eq(14390001)).to.be.true
   })
 
   describe('quotes stablecoin only paths correctly', () => {
-    /// @dev the amount must be expanded to the decimals of the first token in the path
+    /// @dev 数量必须按路径中第一个代币的小数位数进行扩展
     it('V3-V2 stablecoin path with 6 decimal in start of path', async () => {
       const { amountOut, v3SqrtPriceX96AfterList, v3InitializedTicksCrossedList } = await mixedRouteQuoter.callStatic[
         'quoteExactInput(bytes,uint256)'

@@ -8,7 +8,7 @@ import '../interfaces/IMulticallExtended.sol';
 import '../base/PeripheryValidationExtended.sol';
 
 /// @title Multicall
-/// @notice Enables calling multiple methods in a single call to the contract
+/// @notice 支持在对合约的单次调用中调用多个方法
 abstract contract MulticallExtended is IMulticallExtended, Multicall, PeripheryValidationExtended {
     /// @inheritdoc IMulticallExtended
     function multicall(uint256 deadline, bytes[] calldata data)

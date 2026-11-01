@@ -32,7 +32,7 @@ describe('ApproveAndCall', function () {
   }> = async (wallets, provider) => {
     const { factory, router, tokens, nft } = await completeFixture(wallets, provider)
 
-    // approve & fund wallets
+    // 授权并为钱包注资
     for (const token of tokens) {
       await token.approve(nft.address, constants.MaxUint256)
     }
@@ -142,11 +142,11 @@ describe('ApproveAndCall', function () {
       await createPool(tokens[0].address, tokens[1].address)
       const pool = await factory.getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
 
-      // approve in advance
+      // 预先授权
       await router.approveMax(tokens[0].address)
       await router.approveMax(tokens[1].address)
 
-      // send dummy amount of tokens to the pair in advance
+      // 预先向交易对发送一笔占位数量的代币
       const amount = 1000
       await tokens[0].transfer(router.address, amount)
       await tokens[1].transfer(router.address, amount)
@@ -156,7 +156,7 @@ describe('ApproveAndCall', function () {
       let poolBalance0Before = await tokens[0].balanceOf(pool)
       let poolBalance1Before = await tokens[1].balanceOf(pool)
 
-      // perform the mint
+      // 执行 mint
       await router.mint({
         token0: tokens[0].address,
         token1: tokens[1].address,
@@ -175,11 +175,11 @@ describe('ApproveAndCall', function () {
 
       expect((await nft.balanceOf(trader.address)).toNumber()).to.be.eq(1)
 
-      // send more tokens
+      // 发送更多代币
       await tokens[0].transfer(router.address, amount)
       await tokens[1].transfer(router.address, amount)
 
-      // perform the increaseLiquidity
+      // 执行 increaseLiquidity
       await router.increaseLiquidity({
         token0: tokens[0].address,
         token1: tokens[1].address,
@@ -207,26 +207,26 @@ describe('ApproveAndCall', function () {
         amountIn: number,
         amountOutMinimum: number
       ): Promise<ContractTransaction> {
-        // encode the exact input swap
+        // 编码精确输入兑换
         const params = {
           path: encodePath([tokenIn, tokenOut], [FeeAmount.MEDIUM]),
-          recipient: ADDRESS_THIS, // have to send to the router, as it will be adding liquidity for the caller
+          recipient: ADDRESS_THIS, // 必须发送给路由合约，因为它将为调用者添加流动性
           amountIn,
           amountOutMinimum,
         }
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限制再收紧一点兑换就会失败
         const amountOut = await router.connect(trader).callStatic.exactInput(params)
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
         const data = [router.interface.encodeFunctionData('exactInput', [params])]
 
-        // encode the pull (we take the same as the amountOutMinimum, assuming a 50/50 range)
+        // 编码 pull（假设为 50/50 区间，我们拉取与 amountOutMinimum 相同的数量）
         data.push(router.interface.encodeFunctionData('pull', [tokenIn, amountOutMinimum]))
 
-        // encode the approves
+        // 编码授权调用
         data.push(router.interface.encodeFunctionData('approveMax', [tokenIn]))
         data.push(router.interface.encodeFunctionData('approveMax', [tokenOut]))
 
-        // encode the add liquidity
+        // 编码添加流动性调用
         const [token0, token1] =
           tokenIn.toLowerCase() < tokenOut.toLowerCase() ? [tokenIn, tokenOut] : [tokenOut, tokenIn]
         const liquidityParams = {
@@ -248,7 +248,7 @@ describe('ApproveAndCall', function () {
           ])
         )
 
-        // encode the sweeps
+        // 编码 sweep 调用
         data.push(encodeSweepToken(tokenIn, 0))
         data.push(encodeSweepToken(tokenOut, 0))
 
@@ -259,7 +259,7 @@ describe('ApproveAndCall', function () {
         const amountIn = 1000
         const amountOutMinimum = 996
 
-        // prep for the swap + add by sending tokens
+        // 通过发送代币为兑换 + 添加流动性做准备
         await tokens[0].transfer(trader.address, amountIn + amountOutMinimum)
         await tokens[0].connect(trader).approve(router.address, amountIn + amountOutMinimum)
 
@@ -276,7 +276,7 @@ describe('ApproveAndCall', function () {
         const traderToken0BalanceAfter = await tokens[0].balanceOf(trader.address)
         const traderToken1BalanceAfter = await tokens[1].balanceOf(trader.address)
         expect(traderToken0BalanceAfter.toNumber()).to.be.eq(0)
-        expect(traderToken1BalanceAfter.toNumber()).to.be.eq(1) // dust
+        expect(traderToken1BalanceAfter.toNumber()).to.be.eq(1) // 残留粉尘
 
         const traderNFTBalanceAfter = await nft.balanceOf(trader.address)
         expect(traderNFTBalanceAfter.toNumber()).to.be.eq(1)
@@ -297,35 +297,35 @@ describe('ApproveAndCall', function () {
         amountIn: number,
         amountOutMinimum: number
       ): Promise<ContractTransaction> {
-        // encode the exact input swaps
+        // 编码精确输入兑换
         let params = {
           path: encodePath([tokenStart, tokenA], [FeeAmount.MEDIUM]),
-          recipient: ADDRESS_THIS, // have to send to the router, as it will be adding liquidity for the caller
+          recipient: ADDRESS_THIS, // 必须发送给路由合约，因为它将为调用者添加流动性
           amountIn,
           amountOutMinimum,
         }
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限制再收紧一点兑换就会失败
         let amountOut = await router.connect(trader).callStatic.exactInput(params)
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
         let data = [router.interface.encodeFunctionData('exactInput', [params])]
 
-        // encode the exact input swaps
+        // 编码精确输入兑换
         params = {
           path: encodePath([tokenStart, tokenB], [FeeAmount.MEDIUM]),
-          recipient: ADDRESS_THIS, // have to send to the router, as it will be adding liquidity for the caller
+          recipient: ADDRESS_THIS, // 必须发送给路由合约，因为它将为调用者添加流动性
           amountIn,
           amountOutMinimum,
         }
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限制再收紧一点兑换就会失败
         amountOut = await router.connect(trader).callStatic.exactInput(params)
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
         data.push(router.interface.encodeFunctionData('exactInput', [params]))
 
-        // encode the approves
+        // 编码授权调用
         data.push(router.interface.encodeFunctionData('approveMax', [tokenA]))
         data.push(router.interface.encodeFunctionData('approveMax', [tokenB]))
 
-        // encode the add liquidity
+        // 编码添加流动性调用
         const [token0, token1] = tokenA.toLowerCase() < tokenB.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA]
         const liquidityParams = {
           token0,
@@ -346,7 +346,7 @@ describe('ApproveAndCall', function () {
           ])
         )
 
-        // encode the sweeps
+        // 编码 sweep 调用
         data.push(encodeSweepToken(tokenA, 0))
         data.push(encodeSweepToken(tokenB, 0))
 
@@ -357,7 +357,7 @@ describe('ApproveAndCall', function () {
         const amountIn = 1000
         const amountOutMinimum = 996
 
-        // prep for the swap + add by sending tokens
+        // 通过发送代币为兑换 + 添加流动性做准备
         await tokens[0].transfer(trader.address, amountIn * 2)
         await tokens[0].connect(trader).approve(router.address, amountIn * 2)
 

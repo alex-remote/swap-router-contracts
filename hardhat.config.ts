@@ -53,8 +53,8 @@ export default {
     },
   },
   etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
+    // 你的 Etherscan API 密钥
+    // 可在 https://etherscan.io/ 获取
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
   solidity: {

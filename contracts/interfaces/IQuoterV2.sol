@@ -2,19 +2,19 @@
 pragma solidity >=0.7.5;
 pragma abicoder v2;
 
-/// @title QuoterV2 Interface
-/// @notice Supports quoting the calculated amounts from exact input or exact output swaps.
-/// @notice For each pool also tells you the number of initialized ticks crossed and the sqrt price of the pool after the swap.
-/// @dev These functions are not marked view because they rely on calling non-view functions and reverting
-/// to compute the result. They are also not gas efficient and should not be called on-chain.
+/// @title QuoterV2 接口
+/// @notice 支持对精确输入或精确输出兑换计算所得的数量进行报价。
+/// @notice 对于每个池子，还会给出兑换跨越的已初始化 tick 数量以及兑换后池子的 sqrt 价格。
+/// @dev 这些函数未标记为 view，因为它们依赖于调用非 view 函数并通过 revert
+/// 来计算结果。它们的 gas 效率也不高，不应在链上调用。
 interface IQuoterV2 {
-    /// @notice Returns the amount out received for a given exact input swap without executing the swap
-    /// @param path The path of the swap, i.e. each token pair and the pool fee
-    /// @param amountIn The amount of the first token to swap
-    /// @return amountOut The amount of the last token that would be received
-    /// @return sqrtPriceX96AfterList List of the sqrt price after the swap for each pool in the path
-    /// @return initializedTicksCrossedList List of the initialized ticks that the swap crossed for each pool in the path
-    /// @return gasEstimate The estimate of the gas that the swap consumes
+    /// @notice 在不实际执行兑换的情况下，返回给定精确输入兑换可获得的输出数量
+    /// @param path 兑换路径，即每个代币交易对及池子手续费
+    /// @param amountIn 要兑换的第一个代币的数量
+    /// @return amountOut 将会收到的最后一个代币的数量
+    /// @return sqrtPriceX96AfterList 路径中每个池子在兑换后的 sqrt 价格列表
+    /// @return initializedTicksCrossedList 兑换在路径中每个池子所跨越的已初始化 tick 列表
+    /// @return gasEstimate 兑换所消耗 gas 的估计值
     function quoteExactInput(bytes memory path, uint256 amountIn)
         external
         returns (
@@ -32,17 +32,17 @@ interface IQuoterV2 {
         uint160 sqrtPriceLimitX96;
     }
 
-    /// @notice Returns the amount out received for a given exact input but for a swap of a single pool
-    /// @param params The params for the quote, encoded as `QuoteExactInputSingleParams`
-    /// tokenIn The token being swapped in
-    /// tokenOut The token being swapped out
-    /// fee The fee of the token pool to consider for the pair
-    /// amountIn The desired input amount
-    /// sqrtPriceLimitX96 The price limit of the pool that cannot be exceeded by the swap
-    /// @return amountOut The amount of `tokenOut` that would be received
-    /// @return sqrtPriceX96After The sqrt price of the pool after the swap
-    /// @return initializedTicksCrossed The number of initialized ticks that the swap crossed
-    /// @return gasEstimate The estimate of the gas that the swap consumes
+    /// @notice 返回给定精确输入在单个池子兑换中可获得的输出数量
+    /// @param params 报价参数，编码为 `QuoteExactInputSingleParams`
+    /// tokenIn 兑换的输入代币
+    /// tokenOut 兑换的输出代币
+    /// fee 该交易对所要考虑的代币池子的手续费
+    /// amountIn 期望的输入数量
+    /// sqrtPriceLimitX96 兑换不能超过的池子价格限制
+    /// @return amountOut 将会收到的 `tokenOut` 数量
+    /// @return sqrtPriceX96After 兑换后池子的 sqrt 价格
+    /// @return initializedTicksCrossed 兑换跨越的已初始化 tick 数量
+    /// @return gasEstimate 兑换所消耗 gas 的估计值
     function quoteExactInputSingle(QuoteExactInputSingleParams memory params)
         external
         returns (
@@ -52,13 +52,13 @@ interface IQuoterV2 {
             uint256 gasEstimate
         );
 
-    /// @notice Returns the amount in required for a given exact output swap without executing the swap
-    /// @param path The path of the swap, i.e. each token pair and the pool fee. Path must be provided in reverse order
-    /// @param amountOut The amount of the last token to receive
-    /// @return amountIn The amount of first token required to be paid
-    /// @return sqrtPriceX96AfterList List of the sqrt price after the swap for each pool in the path
-    /// @return initializedTicksCrossedList List of the initialized ticks that the swap crossed for each pool in the path
-    /// @return gasEstimate The estimate of the gas that the swap consumes
+    /// @notice 在不实际执行兑换的情况下，返回给定精确输出兑换所需的输入数量
+    /// @param path 兑换路径，即每个代币交易对及池子手续费。路径必须按逆序提供
+    /// @param amountOut 要收到的最后一个代币的数量
+    /// @return amountIn 需要支付的第一个代币的数量
+    /// @return sqrtPriceX96AfterList 路径中每个池子在兑换后的 sqrt 价格列表
+    /// @return initializedTicksCrossedList 兑换在路径中每个池子所跨越的已初始化 tick 列表
+    /// @return gasEstimate 兑换所消耗 gas 的估计值
     function quoteExactOutput(bytes memory path, uint256 amountOut)
         external
         returns (
@@ -76,17 +76,17 @@ interface IQuoterV2 {
         uint160 sqrtPriceLimitX96;
     }
 
-    /// @notice Returns the amount in required to receive the given exact output amount but for a swap of a single pool
-    /// @param params The params for the quote, encoded as `QuoteExactOutputSingleParams`
-    /// tokenIn The token being swapped in
-    /// tokenOut The token being swapped out
-    /// fee The fee of the token pool to consider for the pair
-    /// amountOut The desired output amount
-    /// sqrtPriceLimitX96 The price limit of the pool that cannot be exceeded by the swap
-    /// @return amountIn The amount required as the input for the swap in order to receive `amountOut`
-    /// @return sqrtPriceX96After The sqrt price of the pool after the swap
-    /// @return initializedTicksCrossed The number of initialized ticks that the swap crossed
-    /// @return gasEstimate The estimate of the gas that the swap consumes
+    /// @notice 返回在单个池子兑换中收到给定精确输出数量所需的输入数量
+    /// @param params 报价参数，编码为 `QuoteExactOutputSingleParams`
+    /// tokenIn 兑换的输入代币
+    /// tokenOut 兑换的输出代币
+    /// fee 该交易对所要考虑的代币池子的手续费
+    /// amountOut 期望的输出数量
+    /// sqrtPriceLimitX96 兑换不能超过的池子价格限制
+    /// @return amountIn 为收到 `amountOut` 而需作为兑换输入的数量
+    /// @return sqrtPriceX96After 兑换后池子的 sqrt 价格
+    /// @return initializedTicksCrossed 兑换跨越的已初始化 tick 数量
+    /// @return gasEstimate 兑换所消耗 gas 的估计值
     function quoteExactOutputSingle(QuoteExactOutputSingleParams memory params)
         external
         returns (

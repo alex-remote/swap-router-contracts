@@ -3,27 +3,27 @@ pragma solidity >=0.7.5;
 
 import '@uniswap/v3-periphery/contracts/interfaces/IPeripheryPayments.sol';
 
-/// @title Periphery Payments Extended
-/// @notice Functions to ease deposits and withdrawals of ETH and tokens
+/// @title 外围支付扩展（Periphery Payments Extended）
+/// @notice 便于存入和提取 ETH 及代币的函数
 interface IPeripheryPaymentsExtended is IPeripheryPayments {
-    /// @notice Unwraps the contract's WETH9 balance and sends it to msg.sender as ETH.
-    /// @dev The amountMinimum parameter prevents malicious contracts from stealing WETH9 from users.
-    /// @param amountMinimum The minimum amount of WETH9 to unwrap
+    /// @notice 将本合约的 WETH9 余额解包，并以 ETH 形式发送给 msg.sender。
+    /// @dev amountMinimum 参数用于防止恶意合约窃取用户的 WETH9。
+    /// @param amountMinimum 要解包的 WETH9 最小数量
     function unwrapWETH9(uint256 amountMinimum) external payable;
 
-    /// @notice Wraps the contract's ETH balance into WETH9
-    /// @dev The resulting WETH9 is custodied by the router, thus will require further distribution
-    /// @param value The amount of ETH to wrap
+    /// @notice 将本合约的 ETH 余额包装为 WETH9
+    /// @dev 生成的 WETH9 由路由合约托管，因此需要进一步分发
+    /// @param value 要包装的 ETH 数量
     function wrapETH(uint256 value) external payable;
 
-    /// @notice Transfers the full amount of a token held by this contract to msg.sender
-    /// @dev The amountMinimum parameter prevents malicious contracts from stealing the token from users
-    /// @param token The contract address of the token which will be transferred to msg.sender
-    /// @param amountMinimum The minimum amount of token required for a transfer
+    /// @notice 将本合约持有的某种代币全部转给 msg.sender
+    /// @dev amountMinimum 参数用于防止恶意合约窃取用户的代币
+    /// @param token 将被转给 msg.sender 的代币的合约地址
+    /// @param amountMinimum 执行转账所要求的代币最小数量
     function sweepToken(address token, uint256 amountMinimum) external payable;
 
-    /// @notice Transfers the specified amount of a token from the msg.sender to address(this)
-    /// @param token The token to pull
-    /// @param value The amount to pay
+    /// @notice 将指定数量的代币从 msg.sender 转入 address(this)
+    /// @param token 要拉取的代币
+    /// @param value 要支付的数量
     function pull(address token, uint256 value) external payable;
 }

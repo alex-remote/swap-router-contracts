@@ -8,9 +8,9 @@ import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.s
 import '../interfaces/IApproveAndCall.sol';
 import './ImmutableState.sol';
 
-/// @title Approve and Call
-/// @notice Allows callers to approve the Uniswap V3 position manager from this contract,
-/// for any token, and then make calls into the position manager
+/// @title 授权并调用
+/// @notice 允许调用者从本合约向 Uniswap V3 头寸管理器（position manager）授权，
+/// 授权可针对任意代币，随后再调用头寸管理器
 abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
     function tryApprove(address token, uint256 amount) private returns (bool) {
         (bool success, bytes memory data) =
@@ -20,17 +20,17 @@ abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
 
     /// @inheritdoc IApproveAndCall
     function getApprovalType(address token, uint256 amount) external override returns (ApprovalType) {
-        // check existing approval
+        // 检查已有的授权额度
         if (IERC20(token).allowance(address(this), positionManager) >= amount) return ApprovalType.NOT_REQUIRED;
 
-        // try type(uint256).max / type(uint256).max - 1
+        // 尝试授权 type(uint256).max / type(uint256).max - 1
         if (tryApprove(token, type(uint256).max)) return ApprovalType.MAX;
         if (tryApprove(token, type(uint256).max - 1)) return ApprovalType.MAX_MINUS_ONE;
 
-        // set approval to 0 (must succeed)
+        // 将授权额度设为 0（必须成功）
         require(tryApprove(token, 0));
 
-        // try type(uint256).max / type(uint256).max - 1
+        // 尝试授权 type(uint256).max / type(uint256).max - 1
         if (tryApprove(token, type(uint256).max)) return ApprovalType.ZERO_THEN_MAX;
         if (tryApprove(token, type(uint256).max - 1)) return ApprovalType.ZERO_THEN_MAX_MINUS_ONE;
 
@@ -65,7 +65,7 @@ abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
         (success, result) = positionManager.call(data);
 
         if (!success) {
-            // Next 5 lines from https://ethereum.stackexchange.com/a/83577
+            // 以下 5 行代码来自 https://ethereum.stackexchange.com/a/83577
             if (result.length < 68) revert();
             assembly {
                 result := add(result, 0x04)
@@ -95,7 +95,7 @@ abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
                         amount0Min: params.amount0Min,
                         amount1Min: params.amount1Min,
                         recipient: params.recipient,
-                        deadline: type(uint256).max // deadline should be checked via multicall
+                        deadline: type(uint256).max // 截止时间应通过 multicall 检查
                     })
                 )
             );
@@ -118,7 +118,7 @@ abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
                         amount1Desired: balanceOf(params.token1),
                         amount0Min: params.amount0Min,
                         amount1Min: params.amount1Min,
-                        deadline: type(uint256).max // deadline should be checked via multicall
+                        deadline: type(uint256).max // 截止时间应通过 multicall 检查
                     })
                 )
             );

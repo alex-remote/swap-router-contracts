@@ -13,15 +13,15 @@ import '@uniswap/v3-periphery/contracts/libraries/CallbackValidation.sol';
 
 import '../interfaces/IQuoter.sol';
 
-/// @title Provides quotes for swaps
-/// @notice Allows getting the expected amount out or amount in for a given swap without executing the swap
-/// @dev These functions are not gas efficient and should _not_ be called on chain. Instead, optimistically execute
-/// the swap and check the amounts in the callback.
+/// @title 为兑换提供报价
+/// @notice 无需实际执行兑换即可获取给定兑换的预期输出数量或输入数量
+/// @dev 这些函数的 gas 效率不高，_不应_ 在链上调用。应改为乐观地执行
+/// 兑换，并在回调中检查数量。
 contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
     using Path for bytes;
     using SafeCast for uint256;
 
-    /// @dev Transient storage variable used to check a safety condition in exact output swaps.
+    /// @dev 临时存储变量，用于在精确输出兑换中检查一项安全条件。
     uint256 private amountOutCached;
 
     constructor(address _factory, address _WETH9) PeripheryImmutableState(_factory, _WETH9) {}
@@ -40,7 +40,7 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
         int256 amount1Delta,
         bytes memory path
     ) external view override {
-        require(amount0Delta > 0 || amount1Delta > 0); // swaps entirely within 0-liquidity regions are not supported
+        require(amount0Delta > 0 || amount1Delta > 0); // 不支持完全处于零流动性区间内的兑换
         (address tokenIn, address tokenOut, uint24 fee) = path.decodeFirstPool();
         CallbackValidation.verifyCallback(factory, tokenIn, tokenOut, fee);
 
@@ -55,7 +55,7 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
                 revert(ptr, 32)
             }
         } else {
-            // if the cache has been populated, ensure that the full output amount has been received
+            // 如果缓存已被填充，确保已收到全部输出数量
             if (amountOutCached != 0) require(amountReceived == amountOutCached);
             assembly {
                 let ptr := mload(0x40)
@@ -65,7 +65,7 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
         }
     }
 
-    /// @dev Parses a revert reason that should contain the numeric quote
+    /// @dev 解析应包含数值报价的 revert 原因
     function parseRevertReason(bytes memory reason) private pure returns (uint256) {
         if (reason.length != 32) {
             if (reason.length < 68) revert('Unexpected error');
@@ -89,7 +89,7 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
 
         try
             getPool(tokenIn, tokenOut, fee).swap(
-                address(this), // address(0) might cause issues with some tokens
+                address(this), // 使用 address(0) 可能会导致某些代币出现问题
                 zeroForOne,
                 amountIn.toInt256(),
                 sqrtPriceLimitX96 == 0
@@ -109,10 +109,10 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
 
             (address tokenIn, address tokenOut, uint24 fee) = path.decodeFirstPool();
 
-            // the outputs of prior swaps become the inputs to subsequent ones
+            // 前一次兑换的输出成为后续兑换的输入
             amountIn = quoteExactInputSingle(tokenIn, tokenOut, fee, amountIn, 0);
 
-            // decide whether to continue or terminate
+            // 决定继续还是终止
             if (hasMultiplePools) {
                 path = path.skipToken();
             } else {
@@ -131,11 +131,11 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
     ) public override returns (uint256 amountIn) {
         bool zeroForOne = tokenIn < tokenOut;
 
-        // if no price limit has been specified, cache the output amount for comparison in the swap callback
+        // 如果未指定价格限制，则缓存输出数量，以便在兑换回调中进行比较
         if (sqrtPriceLimitX96 == 0) amountOutCached = amountOut;
         try
             getPool(tokenIn, tokenOut, fee).swap(
-                address(this), // address(0) might cause issues with some tokens
+                address(this), // 使用 address(0) 可能会导致某些代币出现问题
                 zeroForOne,
                 -amountOut.toInt256(),
                 sqrtPriceLimitX96 == 0
@@ -144,7 +144,7 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
                 abi.encodePacked(tokenOut, fee, tokenIn)
             )
         {} catch (bytes memory reason) {
-            if (sqrtPriceLimitX96 == 0) delete amountOutCached; // clear cache
+            if (sqrtPriceLimitX96 == 0) delete amountOutCached; // 清除缓存
             return parseRevertReason(reason);
         }
     }
@@ -156,10 +156,10 @@ contract Quoter is IQuoter, IUniswapV3SwapCallback, PeripheryImmutableState {
 
             (address tokenOut, address tokenIn, uint24 fee) = path.decodeFirstPool();
 
-            // the inputs of prior swaps become the outputs of subsequent ones
+            // 前一次兑换的输入成为后续兑换的输出
             amountOut = quoteExactOutputSingle(tokenIn, tokenOut, fee, amountOut, 0);
 
-            // decide whether to continue or terminate
+            // 决定继续还是终止
             if (hasMultiplePools) {
                 path = path.skipToken();
             } else {

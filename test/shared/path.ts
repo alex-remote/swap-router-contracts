@@ -13,27 +13,27 @@ export function encodePath(path: string[], fees: FeeAmount[]): string {
 
   let encoded = '0x'
   for (let i = 0; i < fees.length; i++) {
-    // 20 byte encoding of the address
+    // 地址的 20 字节编码
     encoded += path[i].slice(2)
-    // 3 byte encoding of the fee
+    // 手续费的 3 字节编码
     encoded += fees[i].toString(16).padStart(2 * FEE_SIZE, '0')
   }
-  // encode the final token
+  // 编码最后一个代币
   encoded += path[path.length - 1].slice(2)
 
   return encoded.toLowerCase()
 }
 
 function decodeOne(tokenFeeToken: Buffer): [[string, string], number] {
-  // reads the first 20 bytes for the token address
+  // 读取前 20 个字节作为代币地址
   const tokenABuf = tokenFeeToken.slice(0, ADDR_SIZE)
   const tokenA = utils.getAddress('0x' + tokenABuf.toString('hex'))
 
-  // reads the next 2 bytes for the fee
+  // 读取接下来的 2 个字节作为手续费
   const feeBuf = tokenFeeToken.slice(ADDR_SIZE, OFFSET)
   const fee = feeBuf.readUIntBE(0, FEE_SIZE)
 
-  // reads the next 20 bytes for the token address
+  // 读取接下来的 20 个字节作为代币地址
   const tokenBBuf = tokenFeeToken.slice(OFFSET, DATA_SIZE)
   const tokenB = utils.getAddress('0x' + tokenBBuf.toString('hex'))
 

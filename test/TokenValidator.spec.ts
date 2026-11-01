@@ -15,9 +15,9 @@ describe('TokenValidator', function () {
     STF = 2,
   }
 
-  // WETH9 and USDC
+  // WETH9 和 USDC
   const BASE_TOKENS = ['0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48']
-  // Arbitrary amount to flash loan.
+  // 用于闪电贷的任意数量。
   const AMOUNT_TO_BORROW = 1000
 
   const FOT_TOKENS = [
@@ -38,7 +38,7 @@ describe('TokenValidator', function () {
   ]
 
   before(async function () {
-    // Easiest to test FOT using real world data, so these tests require a hardhat fork.
+    // 使用真实链上数据测试 FOT 最为简便，因此这些测试需要 hardhat 分叉。
     if (!process.env.ARCHIVE_RPC_URL) {
       this.skip()
     }
@@ -57,17 +57,17 @@ describe('TokenValidator', function () {
 
     const factory = await ethers.getContractFactory('TokenValidator')
     tokenValidator = (await factory.deploy(
-      '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // V2 Factory
-      '0xC36442b4a4522E871399CD717aBDD847Ab11FE88' // V3 NFT position manager
+      '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // V2 工厂合约
+      '0xC36442b4a4522E871399CD717aBDD847Ab11FE88' // V3 NFT 头寸管理合约
     )) as TokenValidator
 
-    // Deploy a new token for testing.
+    // 部署一个新代币用于测试。
     const tokenFactory = await ethers.getContractFactory('TestERC20')
     testToken = (await tokenFactory.deploy(constants.MaxUint256.div(2))) as TestERC20
   })
 
   after(async () => {
-    // Disable mainnet forking to avoid effecting other tests.
+    // 禁用主网分叉，以免影响其他测试。
     await hre.network.provider.request({
       method: 'hardhat_reset',
       params: [],
@@ -98,7 +98,7 @@ describe('TokenValidator', function () {
   })
 
   it('succeeds to return unknown when flash loaning full reserves', async () => {
-    const pairAddress = '0xab293dce330b92aa52bc2a7cd3816edaa75f890b' // WTF/ETH pair
+    const pairAddress = '0xab293dce330b92aa52bc2a7cd3816edaa75f890b' // WTF/ETH 交易对
     const pair = IUniswapV2Pair__factory.connect(pairAddress, ethers.provider)
     const { reserve0: wtfReserve } = await pair.callStatic.getReserves()
 

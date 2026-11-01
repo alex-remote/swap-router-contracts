@@ -18,7 +18,7 @@ import snapshotGasCost from './shared/snapshotGasCost'
 
 import { abi as PAIR_V2_ABI } from '@uniswap/v2-core/build/UniswapV2Pair.json'
 
-const V3_MAX_FEE = 999999 // = 1_000_000 - 1 since must be < 1_000_000
+const V3_MAX_FEE = 999999 // = 1_000_000 - 1，因为必须 < 1_000_000
 
 describe('MixedRouteQuoterV1', function () {
   this.timeout(40000)
@@ -33,7 +33,7 @@ describe('MixedRouteQuoterV1', function () {
   }> = async (wallets, provider) => {
     const { weth9, factory, factoryV2, router, tokens, nft } = await completeFixture(wallets, provider)
 
-    // approve & fund wallets
+    // 授权并为钱包注资
     for (const token of tokens) {
       await token.approve(router.address, constants.MaxUint256)
       await token.approve(nft.address, constants.MaxUint256)
@@ -67,7 +67,7 @@ describe('MixedRouteQuoterV1', function () {
     loadFixture = waffle.createFixtureLoader(wallets)
   })
 
-  // helper for getting weth and token balances
+  // 获取 weth 和代币余额的辅助函数
   beforeEach('load fixture', async () => {
     ;({ tokens, nft, factoryV2, quoter } = await loadFixture(swapRouterFixture))
   })
@@ -82,7 +82,7 @@ describe('MixedRouteQuoterV1', function () {
     const pair = new Contract(pairAddress, PAIR_V2_ABI, wallet)
     expect(await pair.callStatic.token0()).to.equal(token0.address)
     expect(await pair.callStatic.token1()).to.equal(token1.address)
-    // seed the pairs with liquidity
+    // 为交易对注入初始流动性
 
     const [reserve0Before, reserve1Before]: [BigNumber, BigNumber] = await pair.callStatic.getReserves()
 
@@ -95,7 +95,7 @@ describe('MixedRouteQuoterV1', function () {
     expect(await token0.balanceOf(pairAddress)).to.equal(token0BalanceBefore.add(ethers.utils.parseEther(amount0)))
     expect(await token1.balanceOf(pairAddress)).to.equal(token1BalanceBefore.add(ethers.utils.parseEther(amount1)))
 
-    await pair.mint(wallet.address) // update the reserves
+    await pair.mint(wallet.address) // 更新储备量
 
     const [reserve0, reserve1] = await pair.callStatic.getReserves()
     expect(reserve0).to.equal(reserve0Before.add(ethers.utils.parseEther(amount0)))
@@ -107,7 +107,7 @@ describe('MixedRouteQuoterV1', function () {
       await createPool(nft, wallet, tokens[0].address, tokens[1].address)
       await createPool(nft, wallet, tokens[1].address, tokens[2].address)
       await createPoolWithMultiplePositions(nft, wallet, tokens[0].address, tokens[2].address)
-      /// @dev Create V2 Pairs
+      /// @dev 创建 V2 交易对
       pair01Address = await createPair(factoryV2, tokens[0].address, tokens[1].address)
       pair12Address = await createPair(factoryV2, tokens[1].address, tokens[2].address)
       pair02Address = await createPair(factoryV2, tokens[0].address, tokens[2].address)
@@ -117,7 +117,7 @@ describe('MixedRouteQuoterV1', function () {
       await addLiquidityV2(pair02Address, tokens[0], tokens[2], '1000000', '1000000')
     })
 
-    /// @dev Test running the old suite on the new function but with protocolFlags only being V3[]
+    /// @dev 在新函数上运行旧的测试套件，但 protocolFlags 仅为 V3[]
     describe('#quoteExactInput V3 only', () => {
       it('0 -> 2 cross 2 tick', async () => {
         const {
@@ -138,8 +138,8 @@ describe('MixedRouteQuoterV1', function () {
       })
 
       it('0 -> 2 cross 2 tick where after is initialized', async () => {
-        // The swap amount is set such that the active tick after the swap is -120.
-        // -120 is an initialized tick for this pool. We check that we don't count it.
+        // 兑换数量的设定使兑换后的活跃 tick 为 -120。
+        // -120 是该池子已初始化的 tick。我们检查它不会被计入。
         const {
           amountOut,
           v3SqrtPriceX96AfterList,
@@ -177,7 +177,7 @@ describe('MixedRouteQuoterV1', function () {
       })
 
       it('0 -> 2 cross 0 tick, starting tick not initialized', async () => {
-        // Tick before 0, tick after -1.
+        // 兑换前 tick 为 0，兑换后 tick 为 -1。
         const {
           amountOut,
           v3SqrtPriceX96AfterList,
@@ -196,7 +196,7 @@ describe('MixedRouteQuoterV1', function () {
       })
 
       it('0 -> 2 cross 0 tick, starting tick initialized', async () => {
-        // Tick before 0, tick after -1. Tick 0 initialized.
+        // 兑换前 tick 为 0，兑换后 tick 为 -1。tick 0 已初始化。
         await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)
 
         const {
@@ -236,8 +236,8 @@ describe('MixedRouteQuoterV1', function () {
       })
 
       it('2 -> 0 cross 2 where tick after is initialized', async () => {
-        // The swap amount is set such that the active tick after the swap is 120.
-        // 120 is an initialized tick for this pool. We check we don't count it.
+        // 兑换数量的设定使兑换后的活跃 tick 为 120。
+        // 120 是该池子已初始化的 tick。我们检查它不会被计入。
         const {
           amountOut,
           v3SqrtPriceX96AfterList,
@@ -257,7 +257,7 @@ describe('MixedRouteQuoterV1', function () {
       })
 
       it('2 -> 0 cross 0 tick, starting tick initialized', async () => {
-        // Tick 0 initialized. Tick after = 1
+        // tick 0 已初始化。兑换后 tick = 1
         await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)
 
         const {
@@ -279,7 +279,7 @@ describe('MixedRouteQuoterV1', function () {
       })
 
       it('2 -> 0 cross 0 tick, starting tick not initialized', async () => {
-        // Tick 0 initialized. Tick after = 1
+        // tick 0 已初始化。兑换后 tick = 1
         const {
           amountOut,
           v3SqrtPriceX96AfterList,
@@ -337,7 +337,7 @@ describe('MixedRouteQuoterV1', function () {
       })
     })
 
-    /// @dev Test running the old suite on the new function but with protocolFlags only being V2[]
+    /// @dev 在新函数上运行旧的测试套件，但 protocolFlags 仅为 V2[]
     describe('#quoteExactInput V2 only', () => {
       it('0 -> 2', async () => {
         const { amountOut, v3SwapGasEstimate } = await quoter.callStatic['quoteExactInput(bytes,uint256)'](
@@ -361,7 +361,7 @@ describe('MixedRouteQuoterV1', function () {
       })
     })
 
-    /// @dev Test copied over from QuoterV2.spec.ts
+    /// @dev 测试复制自 QuoterV2.spec.ts
     describe('#quoteExactInputSingle V3', () => {
       it('0 -> 2', async () => {
         const {
@@ -406,7 +406,7 @@ describe('MixedRouteQuoterV1', function () {
       })
     })
 
-    /// @dev Test the new function for fetching a single V2 pair quote on chain (exactIn)
+    /// @dev 测试用于在链上获取单个 V2 交易对报价的新函数（exactIn）
     describe('#quoteExactInputSingleV2', () => {
       it('0 -> 2', async () => {
         const amountIn = 10000
@@ -444,10 +444,10 @@ describe('MixedRouteQuoterV1', function () {
 
     describe('testing bit masking for protocol selection', () => {
       it('when given the max v3 fee, should still route v3 and revert because pool DNE', async () => {
-        /// @define 999999 is the max fee that can be set on a V3 pool per the factory
-        ///       in this environment this pool does not exist, and thus the call should revert
-        ///     - however, if the bitmask fails to catch this the call will succeed and route to V2
-        ///     - thus, we expect it to be reverted.
+        /// @define 999999 是 factory 规定的 V3 池子可设置的最大手续费
+        ///       在此环境中该池子不存在，因此调用应当 revert
+        ///     - 然而，如果位掩码未能捕获这一情况，调用将会成功并路由到 V2
+        ///     - 因此，我们预期它会被 revert。
         await expect(
           quoter.callStatic['quoteExactInput(bytes,uint256)'](
             encodePath([tokens[0].address, tokens[1].address], [V3_MAX_FEE]),

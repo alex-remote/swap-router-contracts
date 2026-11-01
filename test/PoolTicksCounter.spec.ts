@@ -14,7 +14,7 @@ describe('PoolTicksCounter', () => {
     let pool: MockContract
     let PoolAbi: Artifact
 
-    // Bit index to tick
+    // 位索引转换为 tick
     const bitIdxToTick = (idx: number, page = 0) => {
       return idx * TICK_SPACING + page * 256 * TICK_SPACING
     }

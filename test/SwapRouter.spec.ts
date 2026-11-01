@@ -37,7 +37,7 @@ describe('SwapRouter', function () {
   }> = async (wallets, provider) => {
     const { weth9, factory, factoryV2, router, tokens, nft } = await completeFixture(wallets, provider)
 
-    // approve & fund wallets
+    // 授权并为钱包注资
     for (const token of tokens) {
       await token.approve(router.address, constants.MaxUint256)
       await token.approve(nft.address, constants.MaxUint256)
@@ -104,7 +104,7 @@ describe('SwapRouter', function () {
     loadFixture = waffle.createFixtureLoader([wallet, trader])
   })
 
-  // helper for getting weth and token balances
+  // 用于获取 weth 和代币余额的辅助函数
   beforeEach('load fixture', async () => {
     ;({ router, quoter, weth9, factory, factoryV2, tokens, nft } = await loadFixture(swapRouterFixture))
 
@@ -124,7 +124,7 @@ describe('SwapRouter', function () {
     }
   })
 
-  // ensure the swap router never ends up with a balance
+  // 确保兑换路由合约最终不会留有余额
   afterEach('load fixture', async () => {
     const balances = await getBalances(router.address)
     expect(Object.values(balances).every((b) => b.eq(0))).to.be.eq(true)
@@ -194,7 +194,7 @@ describe('SwapRouter', function () {
           data.push(encodeUnwrapWETH9(amountOutMinimum))
         }
 
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const amountOut = await router.connect(trader).callStatic.exactInput(params, { value })
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
 
@@ -205,13 +205,13 @@ describe('SwapRouter', function () {
         it('0 -> 1', async () => {
           const pool = await factory.getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
 
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
           await exactInput(tokens.slice(0, 2).map((token) => token.address))
 
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pool)
           const traderAfter = await getBalances(trader.address)
 
@@ -224,7 +224,7 @@ describe('SwapRouter', function () {
         it('1 -> 0', async () => {
           const pool = await factory.getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)
 
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
@@ -235,7 +235,7 @@ describe('SwapRouter', function () {
               .map((token) => token.address)
           )
 
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pool)
           const traderAfter = await getBalances(trader.address)
 
@@ -317,7 +317,7 @@ describe('SwapRouter', function () {
           it('WETH9 -> 0', async () => {
             const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -325,7 +325,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Deposit')
               .withArgs(router.address, 3)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -358,7 +358,7 @@ describe('SwapRouter', function () {
           it('0 -> WETH9', async () => {
             const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -366,7 +366,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -376,14 +376,14 @@ describe('SwapRouter', function () {
           })
 
           it('0 -> 1 -> WETH9', async () => {
-            // get balances before
+            // 获取执行前的余额
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInput([tokens[0].address, tokens[1].address, weth9.address], 5))
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(5))
@@ -420,11 +420,11 @@ describe('SwapRouter', function () {
           data.push(encodeUnwrapWETH9(amountOutMinimum))
         }
 
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const amountOut = await router.connect(trader).callStatic.exactInputSingle(params, { value })
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
 
-        // optimized for the gas test
+        // 为 gas 测试做的优化
         return data.length === 1
           ? router.connect(trader).exactInputSingle(params, { value })
           : router.connect(trader)['multicall(bytes[])'](data, { value })
@@ -433,13 +433,13 @@ describe('SwapRouter', function () {
       it('0 -> 1', async () => {
         const pool = await factory.getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
 
-        // get balances before
+        // 获取执行前的余额
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
         await exactInputSingle(tokens[0].address, tokens[1].address)
 
-        // get balances after
+        // 获取执行后的余额
         const poolAfter = await getBalances(pool)
         const traderAfter = await getBalances(trader.address)
 
@@ -452,13 +452,13 @@ describe('SwapRouter', function () {
       it('1 -> 0', async () => {
         const pool = await factory.getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)
 
-        // get balances before
+        // 获取执行前的余额
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
         await exactInputSingle(tokens[1].address, tokens[0].address)
 
-        // get balances after
+        // 获取执行后的余额
         const poolAfter = await getBalances(pool)
         const traderAfter = await getBalances(trader.address)
 
@@ -477,7 +477,7 @@ describe('SwapRouter', function () {
           it('WETH9 -> 0', async () => {
             const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -485,7 +485,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Deposit')
               .withArgs(router.address, 3)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -506,7 +506,7 @@ describe('SwapRouter', function () {
           it('0 -> WETH9', async () => {
             const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -514,7 +514,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -553,7 +553,7 @@ describe('SwapRouter', function () {
           data.push(encodeUnwrapWETH9(amountOut))
         }
 
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const amountIn = await router.connect(trader).callStatic.exactOutput(params, { value })
         expect(amountIn.toNumber()).to.be.eq(amountInMaximum)
 
@@ -564,13 +564,13 @@ describe('SwapRouter', function () {
         it('0 -> 1', async () => {
           const pool = await factory.getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
 
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
           await exactOutput(tokens.slice(0, 2).map((token) => token.address))
 
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pool)
           const traderAfter = await getBalances(trader.address)
 
@@ -583,7 +583,7 @@ describe('SwapRouter', function () {
         it('1 -> 0', async () => {
           const pool = await factory.getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)
 
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
@@ -594,7 +594,7 @@ describe('SwapRouter', function () {
               .map((token) => token.address)
           )
 
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pool)
           const traderAfter = await getBalances(trader.address)
 
@@ -670,7 +670,7 @@ describe('SwapRouter', function () {
           it('WETH9 -> 0', async () => {
             const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -678,7 +678,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Deposit')
               .withArgs(router.address, 3)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -711,7 +711,7 @@ describe('SwapRouter', function () {
           it('0 -> WETH9', async () => {
             const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -719,7 +719,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -729,14 +729,14 @@ describe('SwapRouter', function () {
           })
 
           it('0 -> 1 -> WETH9', async () => {
-            // get balances before
+            // 获取执行前的余额
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactOutput([tokens[0].address, tokens[1].address, weth9.address], 1, 5))
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(5))
@@ -776,7 +776,7 @@ describe('SwapRouter', function () {
           data.push(encodeUnwrapWETH9(amountOut))
         }
 
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const amountIn = await router.connect(trader).callStatic.exactOutputSingle(params, { value })
         expect(amountIn.toNumber()).to.be.eq(amountInMaximum)
 
@@ -786,13 +786,13 @@ describe('SwapRouter', function () {
       it('0 -> 1', async () => {
         const pool = await factory.getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
 
-        // get balances before
+        // 获取执行前的余额
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
         await exactOutputSingle(tokens[0].address, tokens[1].address)
 
-        // get balances after
+        // 获取执行后的余额
         const poolAfter = await getBalances(pool)
         const traderAfter = await getBalances(trader.address)
 
@@ -805,13 +805,13 @@ describe('SwapRouter', function () {
       it('1 -> 0', async () => {
         const pool = await factory.getPool(tokens[1].address, tokens[0].address, FeeAmount.MEDIUM)
 
-        // get balances before
+        // 获取执行前的余额
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
         await exactOutputSingle(tokens[1].address, tokens[0].address)
 
-        // get balances after
+        // 获取执行后的余额
         const poolAfter = await getBalances(pool)
         const traderAfter = await getBalances(trader.address)
 
@@ -830,7 +830,7 @@ describe('SwapRouter', function () {
           it('WETH9 -> 0', async () => {
             const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -838,7 +838,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Deposit')
               .withArgs(router.address, 3)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -859,7 +859,7 @@ describe('SwapRouter', function () {
           it('0 -> WETH9', async () => {
             const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
 
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
@@ -867,7 +867,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(pool)
             const traderAfter = await getBalances(trader.address)
 
@@ -996,7 +996,7 @@ describe('SwapRouter', function () {
           data.push(encodeUnwrapWETH9(amountOutMinimum))
         }
 
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const paramsWithValue: [number, number, string[], string, { value: number }] = [...params, { value }]
         const amountOut = await router.connect(trader).callStatic.swapExactTokensForTokens(...paramsWithValue)
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
@@ -1006,13 +1006,13 @@ describe('SwapRouter', function () {
 
       describe('single-pool', () => {
         it('0 -> 1', async () => {
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pairs[0].address)
           const traderBefore = await getBalances(trader.address)
 
           await exactInput(tokens.slice(0, 2).map((token) => token.address))
 
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pairs[0].address)
           const traderAfter = await getBalances(trader.address)
 
@@ -1023,7 +1023,7 @@ describe('SwapRouter', function () {
         })
 
         it('1 -> 0', async () => {
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pairs[0].address)
           const traderBefore = await getBalances(trader.address)
 
@@ -1034,7 +1034,7 @@ describe('SwapRouter', function () {
               .map((token) => token.address)
           )
 
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pairs[0].address)
           const traderAfter = await getBalances(trader.address)
 
@@ -1090,13 +1090,13 @@ describe('SwapRouter', function () {
           })
 
           it('WETH9 -> 0', async () => {
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(wethPairs[0].address)
             const traderBefore = await getBalances(trader.address)
             await expect(exactInput([weth9.address, tokens[0].address]))
               .to.emit(weth9, 'Deposit')
               .withArgs(router.address, 2)
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(wethPairs[0].address)
             const traderAfter = await getBalances(trader.address)
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.add(1))
@@ -1124,7 +1124,7 @@ describe('SwapRouter', function () {
           })
 
           it('0 -> WETH9', async () => {
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(wethPairs[0].address)
             const traderBefore = await getBalances(trader.address)
 
@@ -1132,7 +1132,7 @@ describe('SwapRouter', function () {
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(wethPairs[0].address)
             const traderAfter = await getBalances(trader.address)
 
@@ -1142,14 +1142,14 @@ describe('SwapRouter', function () {
           })
 
           it('0 -> 1 -> WETH9', async () => {
-            // get balances before
+            // 获取执行前的余额
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInput([tokens[0].address, tokens[1].address, weth9.address], 3))
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
 
-            // get balances after
+            // 获取执行后的余额
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(3))
@@ -1184,7 +1184,7 @@ describe('SwapRouter', function () {
           data.push(encodeUnwrapWETH9(amountOut))
         }
 
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const paramsWithValue: [number, number, string[], string, { value: number }] = [...params, { value }]
         const amountIn = await router.connect(trader).callStatic.swapTokensForExactTokens(...paramsWithValue)
         expect(amountIn.toNumber()).to.be.eq(amountInMaximum)
@@ -1194,13 +1194,13 @@ describe('SwapRouter', function () {
 
       describe('single-pool', () => {
         it('0 -> 1', async () => {
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pairs[0].address)
           const traderBefore = await getBalances(trader.address)
 
           await exactOutput(tokens.slice(0, 2).map((token) => token.address))
 
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pairs[0].address)
           const traderAfter = await getBalances(trader.address)
           expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(2))
@@ -1210,7 +1210,7 @@ describe('SwapRouter', function () {
         })
 
         it('1 -> 0', async () => {
-          // get balances before
+          // 获取执行前的余额
           const poolBefore = await getBalances(pairs[0].address)
           const traderBefore = await getBalances(trader.address)
           await exactOutput(
@@ -1219,7 +1219,7 @@ describe('SwapRouter', function () {
               .reverse()
               .map((token) => token.address)
           )
-          // get balances after
+          // 获取执行后的余额
           const poolAfter = await getBalances(pairs[0].address)
           const traderAfter = await getBalances(trader.address)
           expect(traderAfter.token0).to.be.eq(traderBefore.token0.add(1))
@@ -1275,13 +1275,13 @@ describe('SwapRouter', function () {
           })
 
           it('WETH9 -> 0', async () => {
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(wethPairs[0].address)
             const traderBefore = await getBalances(trader.address)
             await expect(exactOutput([weth9.address, tokens[0].address]))
               .to.emit(weth9, 'Deposit')
               .withArgs(router.address, 2)
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(wethPairs[0].address)
             const traderAfter = await getBalances(trader.address)
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.add(1))
@@ -1309,13 +1309,13 @@ describe('SwapRouter', function () {
           })
 
           it('0 -> WETH9', async () => {
-            // get balances before
+            // 获取执行前的余额
             const poolBefore = await getBalances(wethPairs[0].address)
             const traderBefore = await getBalances(trader.address)
             await expect(exactOutput([tokens[0].address, weth9.address]))
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
-            // get balances after
+            // 获取执行后的余额
             const poolAfter = await getBalances(wethPairs[0].address)
             const traderAfter = await getBalances(trader.address)
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(2))
@@ -1324,12 +1324,12 @@ describe('SwapRouter', function () {
           })
 
           it('0 -> 1 -> WETH9', async () => {
-            // get balances before
+            // 获取执行前的余额
             const traderBefore = await getBalances(trader.address)
             await expect(exactOutput([tokens[0].address, tokens[1].address, weth9.address], 1, 3))
               .to.emit(weth9, 'Withdrawal')
               .withArgs(router.address, 1)
-            // get balances after
+            // 获取执行后的余额
             const traderAfter = await getBalances(trader.address)
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(3))
           })
@@ -1366,7 +1366,7 @@ describe('SwapRouter', function () {
       const data = [router.interface.encodeFunctionData('exactInput', [params])]
 
       if (!skipAmountOutMinimumCheck) {
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const amountOut = await router.connect(trader).callStatic.exactInput(params)
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
       }
@@ -1389,7 +1389,7 @@ describe('SwapRouter', function () {
 
       const data = [router.interface.encodeFunctionData('exactOutput', [params])]
 
-      // ensure that the swap fails if the limit is any tighter
+      // 确保限额再严格一点兑换就会失败
       const amountIn = await router.connect(trader).callStatic.exactOutput(params)
       expect(amountIn.toNumber()).to.be.eq(amountInMaximum)
 
@@ -1408,7 +1408,7 @@ describe('SwapRouter', function () {
       const data = [router.interface.encodeFunctionData('swapExactTokensForTokens', params)]
 
       if (!skipAmountOutMinimumCheck) {
-        // ensure that the swap fails if the limit is any tighter
+        // 确保限额再严格一点兑换就会失败
         const amountOut = await router.connect(trader).callStatic.swapExactTokensForTokens(...params)
         expect(amountOut.toNumber()).to.be.eq(amountOutMinimum)
       }
@@ -1426,7 +1426,7 @@ describe('SwapRouter', function () {
 
       const data = [router.interface.encodeFunctionData('swapTokensForExactTokens', params)]
 
-      // ensure that the swap fails if the limit is any tighter
+      // 确保限额再严格一点兑换就会失败
       const amountIn = await router.connect(trader).callStatic.swapTokensForExactTokens(...params)
       expect(amountIn.toNumber()).to.be.eq(amountInMaximum)
 
@@ -1577,7 +1577,7 @@ describe('SwapRouter', function () {
 
         const routerAmountOut = traderAfter.token2.sub(traderBefore.token2)
 
-        // expect to equal quoter output
+        // 预期结果与 quoter 的输出相等
         const { amountOut: quoterAmountOut } = await quoter.callStatic['quoteExactInput(bytes,uint256)'](
           encodePath([tokens[0].address, tokens[1].address, tokens[2].address], [FeeAmount.MEDIUM, V2_FEE_PLACEHOLDER]),
           10
@@ -1611,7 +1611,7 @@ describe('SwapRouter', function () {
 
         const routerAmountOut = traderAfter.token2.sub(traderBefore.token2)
 
-        // expect to equal quoter output
+        // 预期结果与 quoter 的输出相等
         const { amountOut: quoterAmountOut } = await quoter.callStatic['quoteExactInput(bytes,uint256)'](
           encodePath([tokens[0].address, tokens[1].address, tokens[2].address], [V2_FEE_PLACEHOLDER, FeeAmount.MEDIUM]),
           10

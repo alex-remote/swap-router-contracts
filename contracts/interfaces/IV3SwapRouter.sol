@@ -4,8 +4,8 @@ pragma abicoder v2;
 
 import '@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol';
 
-/// @title Router token swapping functionality
-/// @notice Functions for swapping tokens via Uniswap V3
+/// @title 路由合约的代币兑换功能
+/// @notice 通过 Uniswap V3 兑换代币的函数
 interface IV3SwapRouter is IUniswapV3SwapCallback {
     struct ExactInputSingleParams {
         address tokenIn;
@@ -17,11 +17,11 @@ interface IV3SwapRouter is IUniswapV3SwapCallback {
         uint160 sqrtPriceLimitX96;
     }
 
-    /// @notice Swaps `amountIn` of one token for as much as possible of another token
-    /// @dev Setting `amountIn` to 0 will cause the contract to look up its own balance,
-    /// and swap the entire amount, enabling contracts to send tokens before calling this function.
-    /// @param params The parameters necessary for the swap, encoded as `ExactInputSingleParams` in calldata
-    /// @return amountOut The amount of the received token
+    /// @notice 将 `amountIn` 数量的一种代币兑换为尽可能多的另一种代币
+    /// @dev 将 `amountIn` 设为 0 会使合约查询自身余额，
+    /// 并兑换全部余额，从而允许合约在调用此函数之前先转入代币。
+    /// @param params 兑换所需的参数，以 `ExactInputSingleParams` 形式编码在 calldata 中
+    /// @return amountOut 收到的代币数量
     function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
 
     struct ExactInputParams {
@@ -31,11 +31,11 @@ interface IV3SwapRouter is IUniswapV3SwapCallback {
         uint256 amountOutMinimum;
     }
 
-    /// @notice Swaps `amountIn` of one token for as much as possible of another along the specified path
-    /// @dev Setting `amountIn` to 0 will cause the contract to look up its own balance,
-    /// and swap the entire amount, enabling contracts to send tokens before calling this function.
-    /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactInputParams` in calldata
-    /// @return amountOut The amount of the received token
+    /// @notice 沿指定路径将 `amountIn` 数量的一种代币兑换为尽可能多的另一种代币
+    /// @dev 将 `amountIn` 设为 0 会使合约查询自身余额，
+    /// 并兑换全部余额，从而允许合约在调用此函数之前先转入代币。
+    /// @param params 多跳兑换所需的参数，以 `ExactInputParams` 形式编码在 calldata 中
+    /// @return amountOut 收到的代币数量
     function exactInput(ExactInputParams calldata params) external payable returns (uint256 amountOut);
 
     struct ExactOutputSingleParams {
@@ -48,10 +48,10 @@ interface IV3SwapRouter is IUniswapV3SwapCallback {
         uint160 sqrtPriceLimitX96;
     }
 
-    /// @notice Swaps as little as possible of one token for `amountOut` of another token
-    /// that may remain in the router after the swap.
-    /// @param params The parameters necessary for the swap, encoded as `ExactOutputSingleParams` in calldata
-    /// @return amountIn The amount of the input token
+    /// @notice 用尽可能少的一种代币兑换 `amountOut` 数量的另一种代币，
+    /// 后者在兑换后可能会留在路由合约中。
+    /// @param params 兑换所需的参数，以 `ExactOutputSingleParams` 形式编码在 calldata 中
+    /// @return amountIn 输入代币的数量
     function exactOutputSingle(ExactOutputSingleParams calldata params) external payable returns (uint256 amountIn);
 
     struct ExactOutputParams {
@@ -61,9 +61,9 @@ interface IV3SwapRouter is IUniswapV3SwapCallback {
         uint256 amountInMaximum;
     }
 
-    /// @notice Swaps as little as possible of one token for `amountOut` of another along the specified path (reversed)
-    /// that may remain in the router after the swap.
-    /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactOutputParams` in calldata
-    /// @return amountIn The amount of the input token
+    /// @notice 沿指定路径（反向）用尽可能少的一种代币兑换 `amountOut` 数量的另一种代币，
+    /// 后者在兑换后可能会留在路由合约中。
+    /// @param params 多跳兑换所需的参数，以 `ExactOutputParams` 形式编码在 calldata 中
+    /// @return amountIn 输入代币的数量
     function exactOutput(ExactOutputParams calldata params) external payable returns (uint256 amountIn);
 }

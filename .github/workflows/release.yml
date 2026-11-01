@@ -1,6 +1,6 @@
 name: Release
 
-on: workflow_dispatch # TODO set this on a deploy schedule
+on: workflow_dispatch # TODO：将其改为按部署计划触发
 
 jobs:
   release:
@@ -13,7 +13,7 @@ jobs:
       - name: Load Secrets
         uses: 1password/load-secrets-action@581a835fb51b8e7ec56b71cf2ffddd7e68bb25e0
         with:
-          # Export loaded secrets as environment variables
+          # 将加载的密钥导出为环境变量
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
-          # Defaults to the user or organization that owns the workflow file
+          # 默认为拥有该工作流文件的用户或组织
           scope: '@uniswap'
       
       - name: Setup CI

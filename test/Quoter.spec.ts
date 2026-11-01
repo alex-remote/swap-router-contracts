@@ -21,7 +21,7 @@ describe('Quoter', () => {
   }> = async (wallets, provider) => {
     const { weth9, factory, router, tokens, nft } = await completeFixture(wallets, provider)
 
-    // approve & fund wallets
+    // 授权并为钱包注资
     for (const token of tokens) {
       await token.approve(router.address, constants.MaxUint256)
       await token.approve(nft.address, constants.MaxUint256)
@@ -51,7 +51,7 @@ describe('Quoter', () => {
     loadFixture = waffle.createFixtureLoader(wallets)
   })
 
-  // helper for getting weth and token balances
+  // 用于获取 weth 和代币余额的辅助函数
   beforeEach('load fixture', async () => {
     ;({ tokens, nft, quoter } = await loadFixture(swapRouterFixture))
   })

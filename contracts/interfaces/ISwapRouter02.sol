@@ -9,7 +9,7 @@ import './IV3SwapRouter.sol';
 import './IApproveAndCall.sol';
 import './IMulticallExtended.sol';
 
-/// @title Router token swapping functionality
+/// @title 路由合约的代币兑换功能
 interface ISwapRouter02 is IV2SwapRouter, IV3SwapRouter, IApproveAndCall, IMulticallExtended, ISelfPermit {
 
 }

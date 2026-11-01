@@ -23,7 +23,7 @@ describe('QuoterV2', function () {
   }> = async (wallets, provider) => {
     const { weth9, factory, router, tokens, nft } = await completeFixture(wallets, provider)
 
-    // approve & fund wallets
+    // 授权并为钱包注资
     for (const token of tokens) {
       await token.approve(router.address, constants.MaxUint256)
       await token.approve(nft.address, constants.MaxUint256)
@@ -53,7 +53,7 @@ describe('QuoterV2', function () {
     loadFixture = waffle.createFixtureLoader(wallets)
   })
 
-  // helper for getting weth and token balances
+  // 用于获取 weth 和代币余额的辅助函数
   beforeEach('load fixture', async () => {
     ;({ tokens, nft, quoter } = await loadFixture(swapRouterFixture))
   })
@@ -85,8 +85,8 @@ describe('QuoterV2', function () {
       })
 
       it('0 -> 2 cross 2 tick where after is initialized', async () => {
-        // The swap amount is set such that the active tick after the swap is -120.
-        // -120 is an initialized tick for this pool. We check that we don't count it.
+        // 兑换数量的设定使得兑换后的当前 tick 为 -120。
+        // -120 是该池子中一个已初始化的 tick。我们检查不会将其计入。
         const {
           amountOut,
           sqrtPriceX96AfterList,
@@ -124,7 +124,7 @@ describe('QuoterV2', function () {
       })
 
       it('0 -> 2 cross 0 tick, starting tick not initialized', async () => {
-        // Tick before 0, tick after -1.
+        // 兑换前 tick 为 0，兑换后 tick 为 -1。
         const {
           amountOut,
           sqrtPriceX96AfterList,
@@ -143,7 +143,7 @@ describe('QuoterV2', function () {
       })
 
       it('0 -> 2 cross 0 tick, starting tick initialized', async () => {
-        // Tick before 0, tick after -1. Tick 0 initialized.
+        // 兑换前 tick 为 0，兑换后 tick 为 -1。tick 0 已初始化。
         await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)
 
         const {
@@ -183,8 +183,8 @@ describe('QuoterV2', function () {
       })
 
       it('2 -> 0 cross 2 where tick after is initialized', async () => {
-        // The swap amount is set such that the active tick after the swap is 120.
-        // 120 is an initialized tick for this pool. We check we don't count it.
+        // 兑换数量的设定使得兑换后的当前 tick 为 120。
+        // 120 是该池子中一个已初始化的 tick。我们检查不会将其计入。
         const {
           amountOut,
           sqrtPriceX96AfterList,
@@ -204,7 +204,7 @@ describe('QuoterV2', function () {
       })
 
       it('2 -> 0 cross 0 tick, starting tick initialized', async () => {
-        // Tick 0 initialized. Tick after = 1
+        // tick 0 已初始化。兑换后 tick = 1
         await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)
 
         const {
@@ -226,7 +226,7 @@ describe('QuoterV2', function () {
       })
 
       it('2 -> 0 cross 0 tick, starting tick not initialized', async () => {
-        // Tick 0 initialized. Tick after = 1
+        // tick 0 已初始化。兑换后 tick = 1
         const {
           amountOut,
           sqrtPriceX96AfterList,
@@ -350,8 +350,8 @@ describe('QuoterV2', function () {
       })
 
       it('0 -> 2 cross 2 where tick after is initialized', async () => {
-        // The swap amount is set such that the active tick after the swap is -120.
-        // -120 is an initialized tick for this pool. We check that we count it.
+        // 兑换数量的设定使得兑换后的当前 tick 为 -120。
+        // -120 是该池子中一个已初始化的 tick。我们检查会将其计入。
         const {
           amountIn,
           sqrtPriceX96AfterList,
@@ -391,7 +391,7 @@ describe('QuoterV2', function () {
       })
 
       it('0 -> 2 cross 0 tick starting tick initialized', async () => {
-        // Tick before 0, tick after 1. Tick 0 initialized.
+        // 兑换前 tick 为 0，兑换后 tick 为 1。tick 0 已初始化。
         await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)
         const {
           amountIn,
@@ -452,8 +452,8 @@ describe('QuoterV2', function () {
       })
 
       it('2 -> 0 cross 2 where tick after is initialized', async () => {
-        // The swap amount is set such that the active tick after the swap is 120.
-        // 120 is an initialized tick for this pool. We check that we don't count it.
+        // 兑换数量的设定使得兑换后的当前 tick 为 120。
+        // 120 是该池子中一个已初始化的 tick。我们检查不会将其计入。
         const {
           amountIn,
           sqrtPriceX96AfterList,

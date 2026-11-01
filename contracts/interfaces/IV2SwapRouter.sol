@@ -2,17 +2,17 @@
 pragma solidity >=0.7.5;
 pragma abicoder v2;
 
-/// @title Router token swapping functionality
-/// @notice Functions for swapping tokens via Uniswap V2
+/// @title 路由合约的代币兑换功能
+/// @notice 通过 Uniswap V2 兑换代币的函数
 interface IV2SwapRouter {
-    /// @notice Swaps `amountIn` of one token for as much as possible of another token
-    /// @dev Setting `amountIn` to 0 will cause the contract to look up its own balance,
-    /// and swap the entire amount, enabling contracts to send tokens before calling this function.
-    /// @param amountIn The amount of token to swap
-    /// @param amountOutMin The minimum amount of output that must be received
-    /// @param path The ordered list of tokens to swap through
-    /// @param to The recipient address
-    /// @return amountOut The amount of the received token
+    /// @notice 将 `amountIn` 数量的一种代币兑换为尽可能多的另一种代币
+    /// @dev 将 `amountIn` 设为 0 会使合约查询自身余额，
+    /// 并兑换全部余额，从而允许合约在调用此函数之前先转入代币。
+    /// @param amountIn 要兑换的代币数量
+    /// @param amountOutMin 必须收到的最少输出数量
+    /// @param path 兑换所经过的代币的有序列表
+    /// @param to 接收者地址
+    /// @return amountOut 收到的代币数量
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
@@ -20,12 +20,12 @@ interface IV2SwapRouter {
         address to
     ) external payable returns (uint256 amountOut);
 
-    /// @notice Swaps as little as possible of one token for an exact amount of another token
-    /// @param amountOut The amount of token to swap for
-    /// @param amountInMax The maximum amount of input that the caller will pay
-    /// @param path The ordered list of tokens to swap through
-    /// @param to The recipient address
-    /// @return amountIn The amount of token to pay
+    /// @notice 用尽可能少的一种代币兑换精确数量的另一种代币
+    /// @param amountOut 要兑换得到的代币数量
+    /// @param amountInMax 调用者愿意支付的最大输入数量
+    /// @param path 兑换所经过的代币的有序列表
+    /// @param to 接收者地址
+    /// @return amountIn 需要支付的代币数量
     function swapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,

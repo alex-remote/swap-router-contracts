@@ -2,24 +2,24 @@
 pragma solidity >=0.7.5;
 pragma abicoder v2;
 
-/// @title Quoter Interface
-/// @notice Supports quoting the calculated amounts from exact input or exact output swaps
-/// @dev These functions are not marked view because they rely on calling non-view functions and reverting
-/// to compute the result. They are also not gas efficient and should not be called on-chain.
+/// @title 报价器（Quoter）接口
+/// @notice 支持对精确输入或精确输出兑换计算所得的数量进行报价
+/// @dev 这些函数未标记为 view，因为它们依赖于调用非 view 函数并通过 revert
+/// 来计算结果。它们的 gas 效率也不高，不应在链上调用。
 interface IQuoter {
-    /// @notice Returns the amount out received for a given exact input swap without executing the swap
-    /// @param path The path of the swap, i.e. each token pair and the pool fee
-    /// @param amountIn The amount of the first token to swap
-    /// @return amountOut The amount of the last token that would be received
+    /// @notice 在不实际执行兑换的情况下，返回给定精确输入兑换可获得的输出数量
+    /// @param path 兑换路径，即每个代币交易对及池子手续费
+    /// @param amountIn 要兑换的第一个代币的数量
+    /// @return amountOut 将会收到的最后一个代币的数量
     function quoteExactInput(bytes memory path, uint256 amountIn) external returns (uint256 amountOut);
 
-    /// @notice Returns the amount out received for a given exact input but for a swap of a single pool
-    /// @param tokenIn The token being swapped in
-    /// @param tokenOut The token being swapped out
-    /// @param fee The fee of the token pool to consider for the pair
-    /// @param amountIn The desired input amount
-    /// @param sqrtPriceLimitX96 The price limit of the pool that cannot be exceeded by the swap
-    /// @return amountOut The amount of `tokenOut` that would be received
+    /// @notice 返回给定精确输入在单个池子兑换中可获得的输出数量
+    /// @param tokenIn 兑换的输入代币
+    /// @param tokenOut 兑换的输出代币
+    /// @param fee 该交易对所要考虑的代币池子的手续费
+    /// @param amountIn 期望的输入数量
+    /// @param sqrtPriceLimitX96 兑换不能超过的池子价格限制
+    /// @return amountOut 将会收到的 `tokenOut` 数量
     function quoteExactInputSingle(
         address tokenIn,
         address tokenOut,
@@ -28,19 +28,19 @@ interface IQuoter {
         uint160 sqrtPriceLimitX96
     ) external returns (uint256 amountOut);
 
-    /// @notice Returns the amount in required for a given exact output swap without executing the swap
-    /// @param path The path of the swap, i.e. each token pair and the pool fee. Path must be provided in reverse order
-    /// @param amountOut The amount of the last token to receive
-    /// @return amountIn The amount of first token required to be paid
+    /// @notice 在不实际执行兑换的情况下，返回给定精确输出兑换所需的输入数量
+    /// @param path 兑换路径，即每个代币交易对及池子手续费。路径必须按逆序提供
+    /// @param amountOut 要收到的最后一个代币的数量
+    /// @return amountIn 需要支付的第一个代币的数量
     function quoteExactOutput(bytes memory path, uint256 amountOut) external returns (uint256 amountIn);
 
-    /// @notice Returns the amount in required to receive the given exact output amount but for a swap of a single pool
-    /// @param tokenIn The token being swapped in
-    /// @param tokenOut The token being swapped out
-    /// @param fee The fee of the token pool to consider for the pair
-    /// @param amountOut The desired output amount
-    /// @param sqrtPriceLimitX96 The price limit of the pool that cannot be exceeded by the swap
-    /// @return amountIn The amount required as the input for the swap in order to receive `amountOut`
+    /// @notice 返回在单个池子兑换中收到给定精确输出数量所需的输入数量
+    /// @param tokenIn 兑换的输入代币
+    /// @param tokenOut 兑换的输出代币
+    /// @param fee 该交易对所要考虑的代币池子的手续费
+    /// @param amountOut 期望的输出数量
+    /// @param sqrtPriceLimitX96 兑换不能超过的池子价格限制
+    /// @return amountIn 为收到 `amountOut` 而需作为兑换输入的数量
     function quoteExactOutputSingle(
         address tokenIn,
         address tokenOut,
