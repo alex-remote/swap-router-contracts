@@ -192,7 +192,7 @@
 | SPDX / 换行 | SPDX 行逐字对比；检查 CRLF 与文件末尾换行 | 全部通过 |
 | NatSpec 标签 | 逐行比较 `@tag` 序列、`@param` 参数名、`@inheritdoc` 整行 | 全部一致 |
 | 原 Markdown 未改 | `git diff` 检查 `README.md` / `bug-bounty.md` / `contracts/lens/README.md` | 原件未改动 |
-| 编译与字节码 | solc 0.7.6 分别编译翻译前后的 `contracts/`，对比字节码 | 进行中 |
+| 编译与字节码 | solc 0.7.6（optimizer runs 1000000，`bytecodeHash: none`）分别编译翻译前后的 39 个 `.sol` | 两版均 0 错误；92/92 个合约 bytecode、deployedBytecode、ABI 逐字节一致；devdoc/userdoc 结构一致，无 NatSpec 解析错误 |
 
 ## 八、翻译备注
 
@@ -212,3 +212,4 @@
 **术语补充（术语表外，已在各文件统一）**
 
 - position manager → 头寸管理器（首次出现括注英文）；artifact → 构件；IL routes → IL 路由（保留缩写）；非标准标签 `@define` / `@deprecated` 保留不译。
+- 2026-11-01：验证子代理完成编译与字节码对比，全部一致；任务完成。
